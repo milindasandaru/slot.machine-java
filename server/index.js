@@ -20,7 +20,8 @@ app.post("/api/search", async (req, res) => {
   if (!query) {
     return res.status(400).json({ error: "Query is required" });
   }
-
+  const now = new Date().toISOString();
+  console.log(`Request /api/search at ${now}`);
   console.log("Analyzing user intent for:", query);
   const searchFilters = await extractSearchIntents(query);
   console.log("Extracted filters:", searchFilters);
@@ -37,6 +38,8 @@ app.post("/api/chat", async (req, res) => {
     return res.status(400).json({ error: "Query and Products are required" });
   }
 
+  const now = new Date().toISOString();
+  console.log(`Request /api/chat at ${now}`);
   console.log("Generating stylist response...");
   const aiResponse = await generateStylistResponse(query, products);
   
