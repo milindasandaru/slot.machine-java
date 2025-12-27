@@ -1,51 +1,49 @@
-const express = require("express");
-const cors = require("cors");
-require("dotenv").config();
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import dotenv from 'dotenv';
+import { Logger } from './utils/logger';
 
-// Import our AI functions
-const { extractSearchIntents, generateStylistResponse } = require("./gemini");
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors()); // Allows frontend to talk to backend
-app.use(express.json()); // Allows us to read JSON inputs
+// 1. Security Headers
+app.use(helmet());
 
-// ROUTE 1: The "Filter" Step
-// Frontend sends text -> Backend returns Search JSON
-app.post("/api/search", async (req, res) => {
-  const { query } = req.body;
-  
-  if (!query) {
-    return res.status(400).json({ error: "Query is required" });
-  }
-  const now = new Date().toISOString();
-  console.log(`Request /api/search at ${now}`);
-  console.log("Analyzing user intent for:", query);
-  const searchFilters = await extractSearchIntents(query);
-  console.log("Extracted filters:", searchFilters);
-  
-  res.json(searchFilters);
+// 2. CORS (Strict in production, open in dev)
+app.use(cors());
+
+// 3. Body Parsing
+app.use(express.json());
+
+// 4. Logging Middleware (Connects Morgan to Winston)
+const morganFormat = ':method :url :status :response-time ms';
+app.use(
+  morgan(morganFormat, {
+    stream: {
+      write: (message) => {
+        const logObject = {
+          method: message.split(' ')[0],
+          url: message.split(' ')[1],
+          status: message.split(' ')[2],
+          responseTime: message.split(' ')[3],
+        };
+        Logger.http(JSON.stringify(logObject));
+      },
+    },
+  })
+);
+
+// 5. Health Check (Kubernetes needs this!)
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'UP', timestamp: new Date() });
 });
 
-// ROUTE 2: The "Stylist" Step
-// Frontend sends User Query + Filtered Products -> Backend returns Chat Message
-app.post("/api/chat", async (req, res) => {
-  const { query, products } = req.body;
-
-  if (!query || !products) {
-    return res.status(400).json({ error: "Query and Products are required" });
-  }
-
-  const now = new Date().toISOString();
-  console.log(`Request /api/chat at ${now}`);
-  console.log("Generating stylist response...");
-  const aiResponse = await generateStylistResponse(query, products);
-  
-  res.json({ message: aiResponse });
-});
-
+// START
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  Logger.info(`Server running on http://localhost:${PORT}`);
+  Logger.info(`Security & Logging modules active`);
 });
