@@ -5,7 +5,9 @@ dotenv.config();
 
 // initialize the Google Generative AI client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+// const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+// New:
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 // The system prompt to guide the AI's behavior
 const SYSTEM_PROMPT = `

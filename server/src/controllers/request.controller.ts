@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
-import { analyzeRequest } from '../services/ai.service.js';
-import { Logger } from '../utils/logger.js';
+import { analyzeRequest } from '../services/ai.service.ts';
+import { Logger } from '../utils/logger.ts';
 
 export const createAnalysis = async (req: Request, res: Response) => {
     try {
