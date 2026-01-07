@@ -20,7 +20,7 @@ A fun and interactive slot machine game built with Java! Play with colorful anim
 ### Running the Game
 
 ```bash
-cd c:\Milinda\Coding\git\slot.machine-java\src
+cd slot.machine-java\src
 javac *.java
 java -cp .. SlotMachineGame
 ```
